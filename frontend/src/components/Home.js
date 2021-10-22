@@ -59,9 +59,15 @@ const Home = (props) => {
         <div id="home-container">
             {
                 state.errorMessage.length > 0 && 
-                    <div>
-                        <h1>{state.errorMessage}</h1>
-                        <button value="latest" className="change-button" onClick={changeComic}>Click here to go to the most recent comic.</button>
+                    <div id="error-container">
+                        <div id="error-body">
+                            <h1>{state.errorMessage}</h1>
+                            <button value="latest" className="change-button" onClick={(e) => {
+                                changeComic(e);
+                                props.history.push('/')
+                            }}>Click here to go to the most recent comic.</button>
+                        </div>
+                        
                     </div>
             }
             {
