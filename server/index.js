@@ -12,25 +12,6 @@ let HTTP_PORT = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.urlencoded({extended: true}));
 
-// app.get('/latest', (req, res) => {
-//     const resouceURL = constants.URLs.xkcdRoot + constants.URLs.xkcdComicPath;
-//     axios.get(resouceURL)
-//         .then( response => res.send(response.data))
-//         .catch( err => res.status(500).send(err))
-// })
-
-app.get('test', (req, res) => {
-    
-    // const resourceURL = req.params.comicToFetch === "latest" ? constants.URLs.xkcdRoot + constants.URLs.xkcdComicPath 
-    //                     : constants.URLs.xkcdRoot + `/${req.params.comicToFetch}` + constants.URLs.xkcdComicPath;
-    axios.get("https://xkcd.com/2532/info.0.json")
-        .then( response => {
-            console.log('here')
-            res.send(response.data)
-        })
-        .catch( err => res.status(500).send(err))
-})
-
 app.get('/:comicToFetch', (req, res) => {
     const fetchingLatest = req.params.comicToFetch === "latest"
     const resourceURL = fetchingLatest ? constants.URLs.xkcdRoot + constants.URLs.xkcdComicPath 
