@@ -6,18 +6,27 @@ import dayjs from 'dayjs';
 const Home = (props) => {
     const [state, setState] = useState({
                                 comicData: {}, 
-                                latest: -1
+                                latest: -1,
+                                errorMessage: ""
                             });
     useEffect(() => {
         const comicToFetch = props.match.params.comicNumber ? props.match.params.comicNumber : "latest";
         fetch(`${serverURL}/${comicToFetch}`)
             .then( response => response.json())
-            .then( data => setState({
-                comicData: data, 
-                // If user is requesting the latest comic, the latest comic number is in data.num 
-                // If user is requesting a specific number, the latest comic number is included with the response data 
-                latest: comicToFetch === "latest" ? data.num : data.latestComicNumber
-            }));
+            .then( data => {
+                if (data.status !== undefined && data.status === 404) {
+                    const errorMessage = "Oops! I couldn't find the comic number you were searching for."; 
+                    setState({...state, errorMessage});
+                } else {
+                    setState({
+                        comicData: data, 
+                        // If user is requesting the latest comic, the latest comic number is in data.num 
+                        // If user is requesting a specific number, the latest comic number is included with the response data 
+                        latest: comicToFetch === "latest" ? data.num : data.latestComicNumber
+                    })
+                }
+                
+            });
     }, [])
 
     const getComicDate = () => {
@@ -36,34 +45,46 @@ const Home = (props) => {
             case ("random"):
                 comicNumberToFetch = Math.floor(Math.random() * state.latest) + 1;
                 break;
+            case ("latest"):
+                comicNumberToFetch = "latest";
+                break;
         }
         fetch(serverURL+`/${comicNumberToFetch}`)
             .then( response => response.json())
-            .then( data => setState({...state, comicData: data}))
+            .then( data => setState({...state, comicData: data, errorMessage: ""}))
     }
 
     return (
         <div id="home-container">
-            {state.comicData.img && 
-            <div>
-                <div className="comic-number-header">
-                    <h2 >Comic #{state.comicData.num}</h2>
-                    <p>Created on: {getComicDate()}</p>
-                    <p>View Count: {state.comicData.numberOfViews}</p>
-                </div>
-                <div id="button-container">
-                    <button className="change-button" value="previous" onClick={changeComic}>Previous</button>
-                    <button className="change-button" value="random" onClick={changeComic}>Random</button>
-                    <button disabled={state.latest === state.comicData.num} className={`change-button ${state.latest === state.comicData.num ? "hide-element" : ""}`} value="next" onClick={changeComic}>Next</button>
-                </div>
-                <div>
-                    <img src={state.comicData.img} alt={state.comicData.alt} />
-                </div>
-                <div id="transcript-container">
-                    <h2>Transcript:</h2>
-                    <p style={{"white-space": "pre-wrap"}}>{state.comicData.transcript.length > 0 ? state.comicData.transcript : "No transcript available :("}</p>
-                </div>
-            </div>}
+            {
+                state.errorMessage.length > 0 && 
+                    <div>
+                        <h1>{state.errorMessage}</h1>
+                        <button value="latest" className="change-button" onClick={changeComic}>Click here to go to the most recent comic.</button>
+                    </div>
+            }
+            {
+                state.comicData.img && 
+                    <div>
+                        <div className="comic-number-header">
+                            <h2 >Comic #{state.comicData.num}</h2>
+                            <p>Created on: {getComicDate()}</p>
+                            <p>View Count: {state.comicData.numberOfViews}</p>
+                        </div>
+                        <div id="button-container">
+                            <button className="change-button" value="previous" onClick={changeComic}>Previous</button>
+                            <button className="change-button" value="random" onClick={changeComic}>Random</button>
+                            <button disabled={state.latest === state.comicData.num} className={`change-button ${state.latest === state.comicData.num ? "hide-element" : ""}`} value="next" onClick={changeComic}>Next</button>
+                        </div>
+                        <div>
+                            <img src={state.comicData.img} alt={state.comicData.alt} />
+                        </div>
+                        <div id="transcript-container">
+                            <h2>Transcript:</h2>
+                            <p style={{"whiteSpace": "pre-wrap"}}>{state.comicData.transcript.length > 0 ? state.comicData.transcript : "No transcript available :("}</p>
+                        </div>
+                    </div>
+            }
         </div>
     )
 }
