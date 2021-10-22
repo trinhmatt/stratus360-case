@@ -19,6 +19,7 @@ const Home = (props) => {
                     setState({...state, errorMessage});
                 } else {
                     setState({
+                        ...state,
                         comicData: data, 
                         // If user is requesting the latest comic, the latest comic number is in data.num 
                         // If user is requesting a specific number, the latest comic number is included with the response data 
